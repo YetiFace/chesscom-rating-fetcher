@@ -108,7 +108,7 @@
             dataStr : "data:text/plain;charset=utf-8," + encodeURIComponent(convertToCSV(finalJSON.games))
           }
         }
-        const tcontrolStr = search.tclass == 0 ? search.tcontrol.toString().replaceAll(',', '-') : search.tclass;
+        const tcontrolStr = search.tclass == "none" ? search.tcontrol.toString().replaceAll(',', '-') : search.tclass;
         downloadObject(exportObj, `${search.ccuser}_${tcontrolStr}_${filenameDate(search.sdate)}_${filenameDate(search.edate)}`);
         paper.innerText = "Your download is starting now.";
       }
