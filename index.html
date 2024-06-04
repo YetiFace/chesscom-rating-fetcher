@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
       h1, h2, h3, h4, h5, h6 {
+        color: #5c636a;
         font-family: serif;
       }
       form {
@@ -21,7 +22,7 @@
         <h1 class='text-center mb-3'>Chess.com Opponent Rating Fetcher</h1>
         <p>
           Fetches a player's rated chess.com games between a user defined range of months,
-          filtered by time control, with the option of excluding players below a certain rating.
+          filtered by time control (or time class), with the option of excluding players below a certain rating.
           It returns anonymous data (beyond the file name) with ratings (and rating difference) provided for each player.
         </p>
         <p>
@@ -37,8 +38,19 @@
               <input class="form-control" type="text" id="ccuser" name="ccuser" required>
             </div>
             <div class="mb-3">
-              <label for="tcontrol">Time Control (format: {total seconds}+{increment}, e.g. 180 for 3|0, 180+1 for 3|1)</label>
+              <label for="tcontrol">Specific Time Control (format: {total seconds}+{increment}. Multiple formats can be added with commas. e.g. <code>180</code> for 3|0, <code>180+1,60</code> for 3|1 and 1|0)</label>
               <input class="form-control" type="text" id="tcontrol" name="tcontrol" required>
+            </div>
+            <div class="mb-3">
+              <label for="tclass"><em>ALTERNATIVELY</em> pull all games from a specific time class (i.e. bullet, blitz, rapid, daily or all)</label>
+              <select name="tclass" id="tclass" class="form-select" aria-label="Select a time class to use as an alternative to specifying a time control.">
+                <option selected value="none">Use the Specific Time Control field above (can not use both)</option>
+                <option value="bullet">Bullet</option>
+                <option value="blitz">Blitz</option>
+                <option value="rapid">Rapid</option>
+                <option value="daily">Daily</option>
+                <option value="all">All Time Controls</option>
+              </select>
             </div>
             <div class="mb-3">
               <label for="eopponent">Exclude opponents rated lower than</label>
@@ -62,7 +74,7 @@
               </select>
             </div>
             <div class="mb-3">
-              <input class="form-control" type="submit" value="Fetch Games">
+              <button class="btn btn-secondary form-control" type="submit" value="Fetch Games">Fetch Games</button>
             </div>
         </form>
       </div>
@@ -131,6 +143,34 @@
     <script>
       document.getElementById('sdate').valueAsDate = new Date();
       document.getElementById('edate').valueAsDate = new Date();
+
+      const form = document.querySelector('form');
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        form.ccuser.value = form.ccuser.value.trim();
+        if(form.tclass.value == "none"){
+          form.tcontrol.value = form.tcontrol.value.replace(/ /g,'');
+        } else {
+          form.tcontrol.removeAttribute('disabled', '');
+        }
+        form.submit();
+        if(form.tclass.value != "none"){
+          form.tcontrol.setAttribute('disabled', '');
+        }
+      });
+      [form.sdate, form.edate].forEach(d => {
+        d.addEventListener('click', e => {
+          e.preventDefault();
+          d.showPicker()
+        });
+      });
+      form.tclass.addEventListener('change', e => {
+        if(form.tclass.value == "none"){
+          form.tcontrol.removeAttribute('disabled');
+          return;
+        }
+        form.tcontrol.setAttribute('disabled', '');
+      });
     </script>
 </body>
 </html>

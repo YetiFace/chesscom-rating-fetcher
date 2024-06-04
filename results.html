@@ -46,7 +46,8 @@
 
     const search = {
         "ccuser" : GET("ccuser").toLowerCase(),
-        "tcontrol" : GET("tcontrol"),
+        "tcontrol" : GET("tcontrol").split(','),
+        "tclass" : GET("tclass"),
         "eopponent" : Number(GET("eopponent")),
         "sdate" : new Date(GET("sdate")),
         "edate" : new Date(GET("edate")),
@@ -81,8 +82,6 @@
 
     let processed = 0;
     function processGames(games) {
-      console.log(`${api_urls[processed]}`);
-      console.log(games);
       games.games.forEach(game => {
         const parsedGame = processGame(game);
         if(!parsedGame){return;}
@@ -97,8 +96,6 @@
           paper.innerText = "No games matched your specifications.";
           return;
         }
-        console.log('JSON Finalised');
-        console.log(finalJSON);
         let exportObj = null;
         if(search.etype == 'json'){
           exportObj = {
@@ -111,14 +108,18 @@
             dataStr : "data:text/plain;charset=utf-8," + encodeURIComponent(convertToCSV(finalJSON.games))
           }
         }
-        downloadObject(exportObj, `${search.ccuser}_${search.tcontrol}_${filenameDate(search.sdate)}_${filenameDate(search.edate)}`);
+        const tcontrolStr = search.tclass == 0 ? search.tcontrol.toString().replaceAll(',', '-') : search.tclass;
+        downloadObject(exportObj, `${search.ccuser}_${tcontrolStr}_${filenameDate(search.sdate)}_${filenameDate(search.edate)}`);
         paper.innerText = "Your download is starting now.";
       }
     }
 
     function processGame(game){
       if(
-        game.time_control != search.tcontrol ||
+        search.tclass == "none" &&
+        !search.tcontrol.includes(game.time_control) ||
+        !["none", "all"].includes(search.tclass) &&
+        search.tclass != game.time_class ||
         !game.rated || game.rules != "chess"
       ){return 0;}
 
