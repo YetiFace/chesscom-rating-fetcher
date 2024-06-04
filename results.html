@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Download | Opponent Rating Fetcher</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <style>
+    h1, h2, h3, h4, h5, h6 {
+      font-family: serif;
+    }
+    .api-log p {
+      color: darkgreen;
+    }
+  </style>
+</head>
+<body>
+  <main class='container text-center'>
+    <div class='row my-5'><h2 class='paper'>Please wait whilst your request is processed.</h2></div>
+    <div class='row api-log'></div>
+  </main>
+  <script>
+    let finalJSON = {games:[]};
+    const paper = document.querySelector('.paper');
+    const api_log = document.querySelector('.api-log');
+
+    function convertToCSV(arr) {
+      const array = [Object.keys(arr[0])].concat(arr)
+      return array.map(it => {
+        return Object.values(it).toString()
+      }).join('\n')
+    }
+
+    function GET(parameterName) {
+        var result = null,
+            tmp = [];
+        location.search
+            .substr(1)
+            .split("&")
+            .forEach(function (item) {
+              tmp = item.split("=");
+              if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+            });
+        return result;
+    }
+
+    const search = {
+        "ccuser" : GET("ccuser").toLowerCase(),
+        "tcontrol" : GET("tcontrol"),
+        "eopponent" : Number(GET("eopponent")),
+        "sdate" : new Date(GET("sdate")),
+        "edate" : new Date(GET("edate")),
+        "etype" : GET("etype")
+    };
+
+    function filenameDate(date){
+      return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, "0")}`;
+    }
+
+    function downloadObject(exportObj, exportName){
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", exportObj.dataStr);
+      downloadAnchorNode.setAttribute("download", exportName + exportObj.fExt);
+      document.body.appendChild(downloadAnchorNode);
+
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    }
+
+    async function grabGames(urls) {
+      for (const u of urls){
+        await fetch(u)
+          .then(r =>
+            r.json()
+          )
+          .then(r =>
+            processGames(r)
+          )
+      }
+    }
+
+    let processed = 0;
+    function processGames(games) {
+      console.log(`${api_urls[processed]}`);
+      console.log(games);
+      games.games.forEach(game => {
+        const parsedGame = processGame(game);
+        if(!parsedGame){return;}
+        finalJSON.games.push(parsedGame);
+      });
+      const p = document.createElement('p');
+      p.innerText = api_urls[processed];
+      api_log.append(p);
+      processed++;
+      if(processed == api_urls.length){
+        if(finalJSON.games.length === 0){
+          paper.innerText = "No games matched your specifications.";
+          return;
+        }
+        console.log('JSON Finalised');
+        console.log(finalJSON);
+        let exportObj = null;
+        if(search.etype == 'json'){
+          exportObj = {
+            fExt : ".json",
+            dataStr : "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(finalJSON))
+          };
+        } else {
+          exportObj = {
+            fExt : ".csv",
+            dataStr : "data:text/plain;charset=utf-8," + encodeURIComponent(convertToCSV(finalJSON.games))
+          }
+        }
+        downloadObject(exportObj, `${search.ccuser}_${search.tcontrol}_${filenameDate(search.sdate)}_${filenameDate(search.edate)}`);
+        paper.innerText = "Your download is starting now.";
+      }
+    }
+
+    function processGame(game){
+      if(
+        game.time_control != search.tcontrol ||
+        !game.rated || game.rules != "chess"
+      ){return 0;}
+
+      const g = {
+        "start_time" : game.end_time,
+        "time_control" : game.time_control,
+        "player_rating" : 0,
+        "opponent_rating" : 0,
+        "rating_diff" : 0,
+        "result" : "win",
+        "color" : "white"
+      };
+      let player = null;
+      let opponent = null;
+      if(game.black.username.toLowerCase()==search.ccuser){
+        g.color = "black";
+        player = game.black;
+        opponent = game.white;
+      } else {
+        player = game.white;
+        opponent = game.black;
+      }
+      if(search.eopponent > opponent.rating){return 0;}
+
+      g.player_rating = player.rating;
+      g.opponent_rating = opponent.rating;
+      g.rating_diff = player.rating - opponent.rating;
+
+      if(player.result != 'win' && ['timeout', 'resigned', 'checkmated', 'abandoned'].includes(player.result)){
+        g.result = 'loss';
+      }
+      else if(player.result != 'win' && ['timevsinsufficient', 'agreed', 'stalemate', 'repetition', 'insufficient', '50move'].includes(player.result)){
+        g.result = 'draw';
+      }
+      return g;
+    }
+
+    const api_urls = [];
+    let iDate = new Date(search.sdate.getFullYear(), search.sdate.getMonth(), 1);
+    while(iDate < search.edate){
+      api_urls.push(`https://api.chess.com/pub/player/${ search.ccuser }/games/${ iDate.getFullYear() }/${ (iDate.getMonth()+1).toString().padStart(2, "0") }`);
+      iDate.setMonth(iDate.getMonth()+1);
+    }
+    grabGames(api_urls);
+
+  </script>
+</body>
+</html>
+
+
