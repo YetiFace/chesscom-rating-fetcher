@@ -31,6 +31,15 @@
       }).join('\n')
     }
 
+    const IntlOptions = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false
+    }
+
     function GET(parameterName) {
         var result = null,
             tmp = [];
@@ -111,6 +120,7 @@
         const tcontrolStr = search.tclass == "none" ? search.tcontrol.toString().replaceAll(',', '-') : search.tclass;
         downloadObject(exportObj, `${search.ccuser}_${tcontrolStr}_${filenameDate(search.sdate)}_${filenameDate(search.edate)}`);
         paper.innerText = "Your download is starting now.";
+        console.log(`End time: ${new Date().toLocaleString()}`);
       }
     }
 
@@ -124,13 +134,14 @@
       ){return 0;}
 
       const g = {
-        "start_time" : game.end_time,
+        "date_endtime" : new Intl.DateTimeFormat(undefined, IntlOptions).format(new Date(game.end_time*1000)).replace(',',''),
         "time_control" : game.time_control,
         "player_rating" : 0,
         "opponent_rating" : 0,
         "rating_diff" : 0,
         "result" : "win",
-        "color" : "white"
+        "color" : "white",
+        "unix_endtime" : game.end_time
       };
       let player = null;
       let opponent = null;
@@ -164,6 +175,7 @@
       iDate.setMonth(iDate.getMonth()+1);
     }
     grabGames(api_urls);
+    console.log(`Start time: ${new Date().toLocaleString()}`);
 
   </script>
 </body>

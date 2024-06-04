@@ -82,10 +82,10 @@
         <div class='col-md-6 text-break'>
           <h3>Field Name Definitions</h3>
           <dl>
-            <dt>start_time<dt>
-            <dd>Unix timestamp from when the game started.</dd>
-            <dt>color</dt>
-            <dd>The piece colors the player had ('black' or 'white').</dd>
+            <dt>date_endtime<dt>
+            <dd>The game endtime in a readable format.</dd>
+            <dt>time_control</dt>
+            <dd>The time control in total seconds, plus increment. e.g. 180+1 for 3|1</dd>
             <dt>player_rating</dt>
             <dd>Player rating when game was played.</dd>
             <dt>opponent_rating</dt>
@@ -94,31 +94,37 @@
             <dd>Difference between player and opponent ratings (player_rating-opponent-rating)</dd>
             <dt>result</dt>
             <dd>'win', 'loss', or 'draw'</dd>
-            <dt>time_control</dt>
-            <dd>The time control in total seconds, plus increment. e.g. 180+1 for 3|1</dd>
+            <dt>color</dt>
+            <dd>The piece colors the player had ('black' or 'white').</dd>
+            <dt>unix_endtime</dt>
+            <dd>The game endtime in a Unix Timestamp format.</dd>
           </dl>
         </div>
         <div class='col-md-6 text-break'>
-          <h3>CSV Line Example</h3>
-
-          <blockquote class='pl-2'>
-            &nbsp;&nbsp;start_time,time_control,player_rating,opponent_rating,rating_diff,result,color<br>
-            &nbsp;&nbsp;1714607742,60,2584,2384,200,win,white
-          </blockquote>
-          <h3>JSON Object Example</h3>
-          <blockquote class='pl-2'>
-            <div>{"games": [</div>
-            <div class='ms-2'>{</div>
-            <div class='ms-3'>"start_time":1714607742,</div>
-            <div class='ms-3'>"time_control":"60",</div>
-            <div class='ms-3'>"player_rating":2584,</div>
-            <div class='ms-3'>"opponent_rating":2384,</div>
-            <div class='ms-3'>"rating_diff":200,</div>
-            <div class='ms-3'>"result":"win",</div>
-            <div class='ms-3'>"color":"white"</div>
-            <div class='ms-2'>}</div>
-            ] }
-          </blockquote>
+          <div>
+            <h3>CSV Line Example</h3>
+            <code class='ps-2'>
+              <div class='ms-2'>date_endtime,time_control,player_rating,opponent_rating,rating_diff,result,color,unix_endtime</div>
+              <div class='ms-2'>01/06/2024 15:17,60+1,1628,1603,25,win,white,1717251433</div>
+            </code>
+          </div>
+          <div class='mt-5'>
+            <h3>JSON Object Example</h3>
+            <code class='ps-2'>
+              <div class='ms-1'>{"games": [</div>
+              <div class='ms-2'>{</div>
+              <div class='ms-3'>"date_endtime":"01/06/2024 15:17",</div>
+              <div class='ms-3'>"time_control":"60+1",</div>
+              <div class='ms-3'>"player_rating":1628,</div>
+              <div class='ms-3'>"opponent_rating":1603,</div>
+              <div class='ms-3'>"rating_diff":25,</div>
+              <div class='ms-3'>"result":"win",</div>
+              <div class='ms-3'>"color":"white"</div>
+              <div class='ms-3'>"unix_endtime":1717251433</div>
+              <div class='ms-2'>}</div>
+              <div class='ms-1'>] }</div>
+            </code>
+          </div>
         </div>
         <div class='row my-5'>
           <h3>About The Site</h3>
