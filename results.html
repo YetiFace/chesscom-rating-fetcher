@@ -5,24 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Download | Opponent Rating Fetcher</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <style>
-    h1, h2, h3, h4, h5, h6 {
-      font-family: serif;
-    }
-    .api-log p {
-      color: darkgreen;
-    }
-  </style>
+  <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-  <main class='container text-center'>
-    <div class='row my-5'><h2 class='paper'>Please wait whilst your request is processed.</h2></div>
-    <div class='row api-log'></div>
+  <main class='container mb-5'>
+    <div class='row my-5'><h1 class='text-center paper py-2 mx-auto rounded text-wrap-balance'>Please wait whilst your request is processed.</h1></div>
+    <div class='row mb-3'>
+      <div class='col-md-4'>
+        <h3>Search Parameters</h3>
+        <div class='params'></div>
+      </div>
+      <div class='col-md-4'>
+        <h3>API Endpoints</h3>
+          <div class='api-log overflow-auto'>
+          </div>
+      </div>
+      <div class='col-md-4'>
+        <div>
+          <h3>Dataset Stats</h3>
+          <p>Total Games: <span class="game-count float-end fw-bold">0</span></p>
+          <div class='streak'>
+            <p>Win Streaks: <span class="win-count float-end fw-bold">0</span></p>
+            <p>Unbeaten Streaks: <span class="unbeaten-count float-end fw-bold">0</span></p>
+            <p>Kramnik Streaks: <span class="kramnik-count float-end fw-bold">0</span></p>
+            <p><em>(More details will be shown below when the data has fully processed)</em></p>
+          </div>
+        </div>
+        
+      </div>
+    </div>
   </main>
+    <div class='container-fluid streak'>
+      <div class='row'>
+        <div class='col-lg-4 mb-3'>
+          <h3 class='mb-0'>Win Streaks</h3>
+          <em>Wins Only</em>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Score</th>
+                <th scope="col">Time Class</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+              </tr>
+            </thead>
+            <tbody class='win-streak-log'>
+            </tbody>
+          </table>
+        </div>
+
+        <div class='col-lg-4 mb-3'>
+          <h3 class='mb-0'>Unbeaten Streaks</h3>
+          <em>Wins and Draws</em>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Score</th>
+                <th scope="col">Time Class</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+              </tr>
+            </thead>
+            <tbody class='unbeaten-streak-log'>
+            </tbody>
+          </table>
+        </div>
+
+        <div class='col-lg-4 mb-3'>
+          <h3 class='mb-0'>Kramnik Streaks</h3>
+          <em>One Draw Allowed Between 5 and 25 Wins</em>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Score</th>
+                <th scope="col">Time Class</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+              </tr>
+            </thead>
+            <tbody class='kramnik-streak-log'>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  
   <script>
     let finalJSON = {games:[]};
+
     const paper = document.querySelector('.paper');
     const api_log = document.querySelector('.api-log');
+
+    const streak_table = {
+      win : document.querySelector('.win-streak-log'),
+      unbeaten : document.querySelector('.unbeaten-streak-log'),
+      kramnik : document.querySelector('.kramnik-streak-log')
+    };
+
+    const streaks = {
+      win : {
+        bullet : {
+          start_date : null,
+          end_date : null,
+          count : 0
+        },
+        blitz : {
+          start_date : null,
+          end_date : null,
+          count : 0
+        },
+        rapid : {
+          start_date : null,
+          end_date : null,
+          count : 0
+        },
+        daily : {
+          start_date : null,
+          end_date : null,
+          count : 0
+        }
+      },
+      unbeaten : {
+        bullet : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        },
+        blitz : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        },
+        rapid : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        },
+        daily : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        }
+      },
+      kramnik : {
+        bullet : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        },
+        blitz : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        },
+        rapid : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        },
+        daily : {
+          start_date : null,
+          end_date : null,
+          count : 0,
+          draws : 0
+        }
+      }
+    };
+
+    const streak_count = {
+      win : document.querySelector('.win-count'),
+      unbeaten : document.querySelector('.unbeaten-count'),
+      kramnik : document.querySelector('.kramnik-count')
+    };
+
+    const streak_store = {
+      win : [],
+      unbeaten : [],
+      kramnik : []
+    };
+
+    const api_urls = [];
 
     function convertToCSV(arr) {
       const array = [Object.keys(arr[0])].concat(arr)
@@ -60,8 +233,54 @@
         "eopponent" : Number(GET("eopponent")),
         "sdate" : new Date(GET("sdate")),
         "edate" : new Date(GET("edate")),
-        "etype" : GET("etype")
+        "etype" : GET("etype"),
+        "cstreaks" : Number(GET("cstreaks"))
     };
+
+    function init(){
+      if(search.cstreaks == 0){
+        document.querySelectorAll('.streak').forEach(el => {
+          el.remove();
+        });
+      }
+      let iDate = new Date(search.sdate.getFullYear(), search.sdate.getMonth(), 1);
+      while(iDate <= search.edate){
+        api_urls.push(`https://api.chess.com/pub/player/${ search.ccuser }/games/${ iDate.getFullYear() }/${ (iDate.getMonth()+1).toString().padStart(2, "0") }`);
+        iDate.setMonth(iDate.getMonth()+1);
+      }
+      listParams();
+      grabGames(api_urls);
+      console.log(`Start time: ${new Date().toLocaleString()}`);
+    }
+
+    function listParams(){
+      const params = document.querySelector('.params');
+      let exclusions = 'none';
+      if(search.eopponent > 0){
+        exclusions = `Below ${ search.eopponent }`;
+      }
+      let tcontrols = search.tclass;
+      if(tcontrols=='none'){
+        tcontrols=search.tcontrol;
+      }
+      const drange = `
+        ${ (search.sdate.getMonth()+1).toString().padStart(2, "0") }/
+        ${ search.sdate.getFullYear() } to 
+        ${ (search.edate.getMonth()+1).toString().padStart(2, "0") }/
+        ${ search.edate.getFullYear() }`
+
+      params.innerHTML = `
+        <p>User: <span class='float-end fw-bold'>${ search.ccuser }</span></p>
+        <p>Rating Exclusions: <span class='float-end fw-bold'>${ exclusions }</span></p>
+        <p>Time Controls: <span class='float-end fw-bold'>${ tcontrols }</span></p>
+        <p>Date Range: <span class='float-end fw-bold'>${ drange }</span></p>
+        <p>File Format: <span class='float-end fw-bold'>${ search.etype }</span></p>
+        `;
+
+      if(search.cstreaks != 0){
+        params.innerHTML += `<p>Minimum Streak: <span class='float-end fw-bold'>${ search.cstreaks }</span></p>`
+      }
+    }
 
     function filenameDate(date){
       return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, "0")}`;
@@ -79,13 +298,24 @@
 
     async function grabGames(urls) {
       for (const u of urls){
-        await fetch(u)
-          .then(r =>
-            r.json()
-          )
-          .then(r =>
-            processGames(r)
-          )
+        const p = document.createElement('p');
+        p.innerText = u;
+        api_log.prepend(p);
+        try {
+          await fetch(u)
+          .then(r => {
+            return r.json();
+          })
+          .then(r => {
+            processGames(r);
+            p.classList.add('success');
+          });
+        } catch (error) {
+          p.classList.add('error');
+          paper.innerText = "Request Failed. Did you input the correct username?"
+          console.log(error.message);
+          break;
+        }
       }
     }
 
@@ -96,10 +326,10 @@
         if(!parsedGame){return;}
         finalJSON.games.push(parsedGame);
       });
-      const p = document.createElement('p');
-      p.innerText = api_urls[processed];
-      api_log.append(p);
       processed++;
+      document.querySelector('.game-count').innerText = finalJSON.games.length;
+
+      // split this into new function
       if(processed == api_urls.length){
         if(finalJSON.games.length === 0){
           paper.innerText = "No games matched your specifications.";
@@ -117,9 +347,14 @@
             dataStr : "data:text/plain;charset=utf-8," + encodeURIComponent(convertToCSV(finalJSON.games))
           }
         }
+
         const tcontrolStr = search.tclass == "none" ? search.tcontrol.toString().replaceAll(',', '-') : search.tclass;
         downloadObject(exportObj, `${search.ccuser}_${tcontrolStr}_${filenameDate(search.sdate)}_${filenameDate(search.edate)}`);
         paper.innerText = "Your download is starting now.";
+
+        if(search.cstreaks){
+          streakFinal();
+        }
         console.log(`End time: ${new Date().toLocaleString()}`);
       }
     }
@@ -135,6 +370,7 @@
 
       const g = {
         "date_endtime" : new Intl.DateTimeFormat(undefined, IntlOptions).format(new Date(game.end_time*1000)).replace(',',''),
+        "time_class" : game.time_class,
         "time_control" : game.time_control,
         "player_rating" : 0,
         "opponent_rating" : 0,
@@ -165,20 +401,133 @@
       else if(player.result != 'win' && ['timevsinsufficient', 'agreed', 'stalemate', 'repetition', 'insufficient', '50move'].includes(player.result)){
         g.result = 'draw';
       }
+
+      if(search.cstreaks){
+        processStreak(g);
+      }
       return g;
     }
 
-    const api_urls = [];
-    let iDate = new Date(search.sdate.getFullYear(), search.sdate.getMonth(), 1);
-    while(iDate < search.edate){
-      api_urls.push(`https://api.chess.com/pub/player/${ search.ccuser }/games/${ iDate.getFullYear() }/${ (iDate.getMonth()+1).toString().padStart(2, "0") }`);
-      iDate.setMonth(iDate.getMonth()+1);
+    function processStreak(g){
+      if(g.result=="win"){
+        streakWin(g);
+        return;
+      }
+      if(g.result=="draw"){
+        streakDraw(g);
+        return;
+      }
+      streakLoss(g);
     }
-    grabGames(api_urls);
-    console.log(`Start time: ${new Date().toLocaleString()}`);
+
+    function streakDate(s,g){
+      if(s.count==1){
+        s.start_date = g.date_endtime;
+        return;
+      }
+      s.end_date = g.date_endtime;
+    }
+
+    function streakWin(g){
+      [streaks.win[g.time_class], streaks.unbeaten[g.time_class], streaks.kramnik[g.time_class]].forEach(s => {
+        s.count++;
+        streakDate(s, g);
+      });
+    }
+
+    function streakDraw(g){
+      const ub = streaks.unbeaten[g.time_class];
+      ub.count++;
+      ub.draws++;
+      streakDate(ub, g);
+
+      const ks = streaks.kramnik[g.time_class];
+      if(ks.count >= 25 || ks.count <= 5 || ks.draws > 0){
+        streakBank(streaks.kramnik[g.time_class], g.time_class, 'kramnik');
+      } else {
+        ks.count++;
+        ks.draws++;
+        streakDate(ks, g);
+      }
+
+      streakBank(streaks.win[g.time_class], g.time_class, 'win');
+    }
+
+    function streakLoss(g){
+      streakBank(streaks.win[g.time_class], g.time_class, 'win');
+      streakBank(streaks.unbeaten[g.time_class], g.time_class, 'unbeaten');
+      streakBank(streaks.kramnik[g.time_class], g.time_class, 'kramnik');
+    }
+
+    function streakBank(s, tc, st){
+      if(s.count >= search.cstreaks){
+        let score = s.count;
+        if(st != 'win'){
+          score = s.count - (s.draws/2);
+          score = `${ String(score) }/${ String(s.count) }`;
+        }
+        streak_store[st].push({
+          count : s.count,
+          score : score,
+          tclass : tc,
+          sdate : s.start_date,
+          edate : s.end_date
+        });
+        streak_count[st].innerText = streak_store[st].length;
+      }
+      s.count = 0;
+      if(st != 'win'){
+        s.draws = 0;
+      }
+    }
+
+    function streakFinal(){
+      ['win', 'unbeaten', 'kramnik'].forEach(st => {
+        ['bullet', 'blitz', 'rapid', 'daily'].forEach(tc => {
+          streakBank(streaks[st][tc], tc, st);
+        });
+      });
+      streak_store.win.sort((a, b) => { return a.count - b.count; }).reverse();
+      streak_store.unbeaten.sort((a, b) => { return a.count - b.count; }).reverse();
+      streak_store.kramnik.sort((a, b) => { return a.count - b.count; }).reverse();
+
+      ['win', 'unbeaten', 'kramnik'].forEach(st => {
+        if(streak_store[st].length == 0){
+          const p = document.createElement('p');
+          p.classList.add('text-center');
+          p.innerText = `No ${ st } streaks were found in this dataset`;
+          streak_table[st].closest('table').after(p);
+          return;
+        }
+        streak_store[st].forEach((s,i) => {
+          streakPrint(i+1, streak_table[st], [
+            s.score,
+            s.tclass,
+            s.sdate,
+            s.edate
+          ]);
+        });
+      });
+    }
+    // score, tclass, sdate, edate
+    function streakPrint(index, table, data=[]){
+      const tr = document.createElement('tr');
+      const th = document.createElement('th');
+      th.setAttribute('scope','row');
+      th.innerText = index;
+      tr.append(th);
+
+      data.forEach(d => {
+        const td = document.createElement('td');
+        td.innerText = d;
+        tr.append(td);
+      });
+      
+      table.append(tr);
+    }
+
+    init();
 
   </script>
 </body>
 </html>
-
-

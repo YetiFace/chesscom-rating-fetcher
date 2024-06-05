@@ -5,21 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chess.com Opponent Rating Fetcher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <style>
-      h1, h2, h3, h4, h5, h6 {
-        color: #5c636a;
-        font-family: serif;
-      }
-      form {
-        border: 2px dotted #dee2e6;
-        border-radius: 15px;
-      }
-    </style>
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <main class='container pt-3'>
-      <div class='row'>
-        <h1 class='text-center mb-3'>Chess.com Opponent Rating Fetcher</h1>
+    <main class='container'>
+      <div class='row mb-3'>
+        <h1 class='my-4 py-2 mx-auto rounded text-center text-wrap-balance'>Chess.com Opponent Rating Fetcher</h1>
         <p>
           Fetches a player's rated chess.com games between a user defined range of months,
           filtered by time control (or time class), with the option of excluding players below a certain rating.
@@ -31,8 +22,8 @@
           wait before the download starts, especially when looking at longer periods of time.
         </p>
       </div>
-      <div class='row'>
-        <form target="_blank" class='col mt-3 px-2 py-3' action="results.html" method="get">
+      <div class='row mb-3'>
+        <form target="_blank" class='col px-2 py-3' action="results.html" method="get">
             <div class="mb-3">
               <label for="ccuser">Username (chess.com)</label>
               <input class="form-control" type="text" id="ccuser" name="ccuser" required>
@@ -66,24 +57,35 @@
                 <input class="form-control" type="date" id="edate" name="edate">
               </div>
             </div>
-            <div class="mb-3">
-              <label for="etype">Data Format for Download</label>
-              <select name="etype" id="etype" class="form-select" aria-label="Select a Download Format for the Data">
-                <option selected value="csv">CSV Format (Default)</option>
-                <option value="json">JSON Format</option>
-              </select>
+            <div class="row mb-3">
+              <div class="col-sm-6">
+                <label for="etype">Data Format for Download</label>
+                <select name="etype" id="etype" class="form-select" aria-label="Select a Download Format for the Data">
+                  <option selected value="csv">CSV Format (Default)</option>
+                  <option value="json">JSON Format</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <label for="cstreaks">Count Streaks</label>
+                <select name="cstreaks" id="cstreaks" class="form-select" aria-label="Choose whether to count streaks">
+                  <option selected value="0">No (Fastest Option for Data Download)</option>
+                  <option value="25">Search for Streaks with a Minimum of 25 Games</option>
+                </select>
+              </div>
             </div>
             <div class="mb-3">
               <button class="btn btn-secondary form-control" type="submit" value="Fetch Games">Fetch Games</button>
             </div>
         </form>
       </div>
-      <div class='row mt-5'>
-        <div class='col-md-6 text-break'>
+      <div class='row mb-3'>
+        <div class='col-md-6 mb-3 text-break'>
           <h3>Field Name Definitions</h3>
           <dl>
             <dt>date_endtime<dt>
             <dd>The game endtime in a readable format.</dd>
+            <dt>time_class<dt>
+            <dd>The time control grouping, i.e. bullet, blitz, rapid or daily.</dd>
             <dt>time_control</dt>
             <dd>The time control in total seconds, plus increment. e.g. 180+1 for 3|1</dd>
             <dt>player_rating</dt>
@@ -101,19 +103,20 @@
           </dl>
         </div>
         <div class='col-md-6 text-break'>
-          <div>
+          <div class='mb-3'>
             <h3>CSV Line Example</h3>
             <code class='ps-2'>
-              <div class='ms-2'>date_endtime,time_control,player_rating,opponent_rating,rating_diff,result,color,unix_endtime</div>
-              <div class='ms-2'>01/06/2024 15:17,60+1,1628,1603,25,win,white,1717251433</div>
+              <div class='ms-2'>date_endtime,time_class,time_control,player_rating,opponent_rating,rating_diff,result,color,unix_endtime</div>
+              <div class='ms-2'>01/06/2024 15:17,bullet,60+1,1628,1603,25,win,white,1717251433</div>
             </code>
           </div>
-          <div class='mt-5'>
+          <div class='mb-3'>
             <h3>JSON Object Example</h3>
             <code class='ps-2'>
               <div class='ms-1'>{"games": [</div>
               <div class='ms-2'>{</div>
               <div class='ms-3'>"date_endtime":"01/06/2024 15:17",</div>
+              <div class='ms-3'>"time_class":"bullet",</div>
               <div class='ms-3'>"time_control":"60+1",</div>
               <div class='ms-3'>"player_rating":1628,</div>
               <div class='ms-3'>"opponent_rating":1603,</div>
@@ -126,23 +129,24 @@
             </code>
           </div>
         </div>
-        <div class='row my-5'>
-          <h3>About The Site</h3>
-          <p>The site is entirely front end (there are no server calculations made). In fact, in blazen disregard for web development
-            standards, it consists entirely of two HTML files. You can view their source by manually copying the below links into your address bar.
-            Further there is no kind of tracking on the site beyond standard server access logs.
-          </p>
-          <p>
-            <code class='fst-italic ps-3'>view-source:https://procedure.oxtoby.uk/</code>
-            <code class='fst-italic ps-3'>view-source:https://procedure.oxtoby.uk/results.html</code>
-          </p>
-          <p>
-            I put the site together because I wanted to make it easier for people to verify
-            or dispute various statistical claims flying around the chess world at the moment (circa June 2024).
-            If you have any questions or suggestions for alternations/additions to the site
-            it's probably best to hit me up on <a href='https://x.com/crispyflacs'>Twitter</a>.
-          </p>
-        </div>
+      </div>
+      <div class='row mb-3'>
+        <h3>About The Site</h3>
+        <p>
+          The site is entirely front end (there are no server calculations made). There are two HTML files from which everything can be found. 
+          You can view their source by manually copying the below links into your address bar.
+          Further there is no kind of tracking on the site beyond standard server access logs.
+        </p>
+        <p>
+          <code class='fst-italic ps-3'>view-source:https://procedure.oxtoby.uk/</code>
+          <code class='fst-italic ps-3'>view-source:https://procedure.oxtoby.uk/results.html</code>
+        </p>
+        <p>
+          I put the site together because I wanted to make it easier for people to verify
+          or dispute various statistical claims flying around the chess world at the moment (circa June 2024).
+          If you have any questions or suggestions for alternations/additions to the site
+          it's probably best to hit me up on <a href='https://x.com/crispyflacs'>Twitter</a>.
+        </p>
       </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
