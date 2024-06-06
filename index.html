@@ -8,7 +8,7 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <main class='container'>
+    <main class='container mb-3'>
       <div class='row mb-3'>
         <h1 class='my-4 py-2 mx-auto rounded text-center text-wrap-balance'>Chess.com Opponent Rating Fetcher</h1>
         <p>
@@ -22,7 +22,7 @@
           wait before the download starts, especially when looking at longer periods of time.
         </p>
       </div>
-      <div class='row mb-3'>
+      <div class='row mb-3 px-1'>
         <form target="_blank" class='col px-2 py-3' action="results.html" method="get">
             <div class="mb-3">
               <label for="ccuser">Username (chess.com)</label>
@@ -59,17 +59,19 @@
             </div>
             <div class="row mb-3">
               <div class="col-sm-6">
-                <label for="etype">Data Format for Download</label>
-                <select name="etype" id="etype" class="form-select" aria-label="Select a Download Format for the Data">
-                  <option selected value="csv">CSV Format (Default)</option>
-                  <option value="json">JSON Format</option>
+                <label for="dtype">Automatic Data Download</label>
+                <select name="dtype" id="dtype" class="form-select" aria-label="Automatically Download a Formatted Dataset">
+                  <option selected value="none">No</option>
+                  <option value="csv">Yes, CSV Format</option>
+                  <option value="json">Yes, JSON Format</option>
                 </select>
               </div>
               <div class="col-sm-6">
                 <label for="cstreaks">Count Streaks</label>
                 <select name="cstreaks" id="cstreaks" class="form-select" aria-label="Choose whether to count streaks">
-                  <option selected value="0">No (Fastest Option for Data Download)</option>
-                  <option value="25">Search for Streaks with a Minimum of 25 Games</option>
+                  <option value="25" selected>Minimum 25 Games (Rare)</option>
+                  <option value="10">Minimum 10 Games (Common)</option>
+                  <option value="0">Do Not Count Streaks (Fastest Download)</option>
                 </select>
               </div>
             </div>
@@ -83,23 +85,23 @@
           <h3>Field Name Definitions</h3>
           <dl>
             <dt>date_endtime<dt>
-            <dd>The game endtime in a readable format.</dd>
+            <dd class="ps-1">The game endtime in a readable format.</dd>
             <dt>time_class<dt>
-            <dd>The time control grouping, i.e. bullet, blitz, rapid or daily.</dd>
+            <dd class="ps-1">The time control grouping, i.e. bullet, blitz, rapid or daily.</dd>
             <dt>time_control</dt>
-            <dd>The time control in total seconds, plus increment. e.g. 180+1 for 3|1</dd>
+            <dd class="ps-1">The time control in total seconds, plus increment. e.g. 180+1 for 3|1</dd>
             <dt>player_rating</dt>
-            <dd>Player rating when game was played.</dd>
+            <dd class="ps-1">Player rating when game was played.</dd>
             <dt>opponent_rating</dt>
-            <dd>Opponent rating when game was played</dd>
+            <dd class="ps-1">Opponent rating when game was played</dd>
             <dt>rating_diff</dt>
-            <dd>Difference between player and opponent ratings (player_rating-opponent-rating)</dd>
+            <dd class="ps-1">Difference between player and opponent ratings (player_rating-opponent-rating)</dd>
             <dt>result</dt>
-            <dd>'win', 'loss', or 'draw'</dd>
+            <dd class="ps-1">'win', 'loss', or 'draw'</dd>
             <dt>color</dt>
-            <dd>The piece colors the player had ('black' or 'white').</dd>
+            <dd class="ps-1">The piece colors the player had ('black' or 'white').</dd>
             <dt>unix_endtime</dt>
-            <dd>The game endtime in a Unix Timestamp format.</dd>
+            <dd class="ps-1">The game endtime in a Unix Timestamp format.</dd>
           </dl>
         </div>
         <div class='col-md-6 text-break'>
@@ -151,8 +153,8 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-      document.getElementById('sdate').valueAsDate = new Date();
-      document.getElementById('edate').valueAsDate = new Date();
+      document.querySelector('#sdate').valueAsDate = new Date();
+      document.querySelector('#edate').valueAsDate = new Date();
 
       const form = document.querySelector('form');
       form.addEventListener('submit', e => {

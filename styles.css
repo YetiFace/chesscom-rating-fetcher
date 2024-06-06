@@ -6,6 +6,8 @@
     --download: #ffa500;
     --success: #006400;
     --error: #ff0000;
+    --body-bg: #FAF9F6;
+    --main-bg: #FFFFFF;
 }
 .text-wrap-balance {
   text-wrap: balance;
@@ -16,7 +18,11 @@
 .error {
   color: var(--error)!important;
 }
+body {
+  background-color: var(--body-bg);
+}
 main {
+  background-color: var(--main-bg);
   border-bottom: 5px groove var(--highlight);
 }
 h1 {
@@ -38,15 +44,29 @@ form {
   border: 2px dotted var(--border);
   border-radius: 15px;
 }
-.api-log p {
+#api-log p {
   color: var(--download);
 }
 
-.api-log { 
+#api-log { 
   max-height: 300px;
 }
 @media (min-width: 992px) {
-  .api-log {
+  #api-log {
     max-height: 250px;
   }
+}
+.table-title {
+  background-color: var(--main-bg);
+  border-bottom: 5px ridge var(--highlight);
+}
+.btn-collapse {
+  right: 0.5rem;
+}
+.streak .btn-collapse {
+  right: 1rem;
+  top: 0.5rem;
+}
+.streak-table {
+  background-color: var(--main-bg);
 }
