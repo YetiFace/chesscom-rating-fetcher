@@ -1,18 +1,37 @@
+const P = new URL(document.location).searchParams;
 const search = {
-  "ccuser" : GET("ccuser").toLowerCase(),
-  "tcontrol" : GET("tcontrol").split(','),
-  "tclass" : GET("tclass"),
-  "eopponent" : Number(GET("eopponent")),
-  "sdate" : new Date(GET("sdate")),
-  "edate" : new Date(GET("edate")),
-  "dtype" : GET("dtype"),
-  "cstreaks" : Number(GET("cstreaks"))
+  "ccuser" : P.get("ccuser").toLowerCase(),
+  "tcontrol" : P.get("tcontrol").split(','),
+  "tclass" : P.get("tclass"),
+  "lowratediff" : Number(P.get("lowratediff"))*-1,
+  "upratediff" : Number(P.get("upratediff"))*-1,
+  "sdate" : new Date(P.get("sdate")),
+  "edate" : new Date(P.get("edate")),
+  "fallgames" : Number(P.get("fallgames")),
+  "dtype" : P.get("dtype"),
+  "cstreaks" : Number(P.get("cstreaks"))
 };
 
+console.log(search);
+
+document.querySelector('#home').href += location.search;
 let finalJSON = {games:[]};
+let PGN = "";
 
 const paper = document.querySelector('.paper');
 const api_log = document.querySelector('#api-log');
+
+const ResultCounters = {
+  win : {
+    e : document.querySelector('.win-counter'),
+    c : 0 },
+  draw : {
+    e : document.querySelector('.draw-counter'),
+    c : 0 },
+  loss : {
+    e : document.querySelector('.loss-counter'),
+    c : 0 }
+}
 
 const S = {
   Types : ['win', 'unbeaten', 'kramnik'],
@@ -29,7 +48,7 @@ const S = {
       S.Store[st] = [];
       S.Minimum[st] = search.cstreaks;
       S.Curr[st] = {};
-      
+
       S.TControls.forEach(tc => {
         S.Curr[st][tc] = {
           start_date : null,
@@ -56,7 +75,7 @@ const S = {
       s.start_date = d;
       return;
     }
-    s.end_date = d; 
+    s.end_date = d;
   },
   win : function(g){
     S.Types.forEach(st => {
@@ -89,7 +108,7 @@ const S = {
   },
   Bank : function(st, tc){
     const s = S.Curr[st][tc];
-    if(s.games >= S.Minimum[st] && st!='kramnik' || 
+    if(s.games >= S.Minimum[st] && st!='kramnik' ||
         st == 'kramnik' && (s.games - s.draws) >= S.Minimum[st]
     ){
       const score = s.games - s.draws;
@@ -105,7 +124,7 @@ const S = {
         avopponent : avopponent,
         ratingdiff : ratingdiff,
         sdate : s.start_date,
-        edate : s.end_date 
+        edate : s.end_date
       });
       S.Count[st].innerText = S.Store[st].length;
     }
@@ -180,35 +199,29 @@ const IntlOptions = {
   hour12: false
 }
 
-function GET(param) {
-  const params = location.search.substring(1).split("&");
-  for(const p of params){
-    let pair = p.split("=");
-    if(pair[0]!==param){continue;}
-    return decodeURIComponent(pair[1]);
-  }
-  return null;
-}
-
 function listParams(){
   const params = document.querySelector('#params');
   let exclusions = 'none';
-  if(search.eopponent > 0){
-    exclusions = `Below ${ search.eopponent }`;
-  }
   let tcontrols = search.tclass;
   if(tcontrols=='none'){
     tcontrols=search.tcontrol;
   }
-  const drange = `
-  ${ (search.sdate.getMonth()+1).toString().padStart(2, "0") }/${ search.sdate.getFullYear() } to 
-  ${ (search.edate.getMonth()+1).toString().padStart(2, "0") }/${ search.edate.getFullYear() }`
-
+  else if(tcontrols == 'tt'){
+    tcontrols = "titled tuesday";
+  }
+  let daterange = "all games ever played";
+  if(!search.fallgames){
+    daterange = `
+      ${ (search.sdate.getMonth()+1).toString().padStart(2, "0") }/${ search.sdate.getFullYear() } to
+      ${ (search.edate.getMonth()+1).toString().padStart(2, "0") }/${ search.edate.getFullYear() }
+    `;
+  }
   params.innerHTML = `
     <p>User: <span class='float-end fw-bold'>${ search.ccuser }</span></p>
-    <p>Rating Exclusions: <span class='float-end fw-bold'>${ exclusions }</span></p>
+    <p>Lower Rating Difference: <span class='float-end fw-bold'>${ search.lowratediff*-1 }</span></p>
+    <p>Upper Rating Difference: <span class='float-end fw-bold'>${ search.upratediff*-1 }</span></p>
     <p>Time Controls: <span class='float-end fw-bold'>${ tcontrols }</span></p>
-    <p>Date Range: <span class='float-end fw-bold'>${ drange }</span></p>
+    <p>Date Range: <span class='float-end fw-bold'>${ daterange }</span></p>
     <p>Auto Download Format: <span class='float-end fw-bold'>${ search.dtype }</span></p>
   `;
 
@@ -224,21 +237,46 @@ function filenameDate(date){
 
 function downloadObject(exportName){
   const csvDownload = document.querySelector('.csv-download');
-  csvDownload.setAttribute("href", 
+  csvDownload.setAttribute("href",
     "data:text/plain;charset=utf-8," + encodeURIComponent(convertToCSV(finalJSON.games))
   );
   csvDownload.setAttribute("download", exportName + '.csv');
   csvDownload.classList.remove("disabled");
+  if(search.dtype == 'csv'){ csvDownload.click(); }
 
   const jsonDownload = document.querySelector('.json-download');
-  jsonDownload.setAttribute("href", 
+  jsonDownload.setAttribute("href",
     "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(finalJSON))
   );
   jsonDownload.setAttribute("download", exportName + '.json');
   jsonDownload.classList.remove("disabled");
-
-  if(search.dtype == 'csv'){ csvDownload.click(); }
   if(search.dtype == 'json'){ jsonDownload.click(); }
+
+  const pgnDownload = document.querySelector('.pgn-download');
+  pgnDownload.setAttribute("href",
+    "data:text/plain;charset=utf-8," + encodeURIComponent(PGN)
+  );
+  pgnDownload.setAttribute("download", exportName + '.pgn');
+  pgnDownload.classList.remove("disabled");
+  if(search.dtype == 'pgn'){ pgnDownload.click(); }
+}
+
+async function grabArchive(url){
+  try {
+    await fetch(url)
+    .then(r => {
+      return r.json();
+    })
+    .then(r => {
+      r.archives.forEach(u => {
+        api_urls.push(u);
+      });
+      grabGames(api_urls);
+    });
+  } catch (error) {
+    paper.innerText = "Request Failed. Did you input the correct username?"
+    console.log(error.message);
+  }
 }
 
 async function grabGames(urls) {
@@ -272,7 +310,13 @@ function finalProcessing(){
   }
 
   const tcontrolStr = search.tclass == "none" ? search.tcontrol.toString().replaceAll(',', '-') : search.tclass;
-  downloadObject(`${search.ccuser}_${tcontrolStr}_${filenameDate(search.sdate)}_${filenameDate(search.edate)}`);
+  let fileName = `${search.ccuser}_${tcontrolStr}_`;
+  if(!search.fallgames){
+    fileName += `${filenameDate(search.sdate)}_${filenameDate(search.edate)}`
+  } else {
+    fileName += "all_games";
+  }
+  downloadObject(fileName);
 
   if(search.cstreaks){
     S.Finale();
@@ -289,15 +333,19 @@ function processGames(games) {
     finalJSON.games.push(parsedGame);
   });
   document.querySelector('.game-count').innerText = finalJSON.games.length;
+  ['win', 'loss', 'draw'].forEach(r => {
+    ResultCounters[r].e.innerText = ResultCounters[r].c;
+  });
 }
 
 function processGame(game){
   if(
     search.tclass == "none" &&
     !search.tcontrol.includes(game.time_control) ||
-    !["none", "all"].includes(search.tclass) &&
+    !["none", "all", "tt"].includes(search.tclass) &&
     search.tclass != game.time_class ||
-    !game.rated || game.rules != "chess"
+    !game.rated || game.rules != "chess" ||
+    search.tclass=="tt" && (!('tournament' in game) || 'tournament' in game && game.tournament.search('titled-tuesday')==-1 )
   ){return 0;}
 
   const g = {
@@ -321,11 +369,15 @@ function processGame(game){
     player = game.white;
     opponent = game.black;
   }
-  if(search.eopponent > opponent.rating){return 0;}
 
   g.player_rating = player.rating;
   g.opponent_rating = opponent.rating;
   g.rating_diff = player.rating - opponent.rating;
+
+  if(
+    search.lowratediff && g.rating_diff > search.lowratediff ||
+    search.upratediff && g.rating_diff < search.upratediff
+  ){return 0;}
 
   if(player.result != 'win' && ['timeout', 'resigned', 'checkmated', 'abandoned'].includes(player.result)){
     g.result = 'loss';
@@ -334,11 +386,15 @@ function processGame(game){
     g.result = 'draw';
   }
 
+  ResultCounters[g.result].c++;
+  PGN += game.pgn += '\n';
+
   if(search.cstreaks){
     S[g.result](g);
   }
   return g;
 }
+
 function init(){
   if(window.innerWidth >= 576){
     new bootstrap.Collapse('#api-log', {
@@ -348,19 +404,22 @@ function init(){
       toggle: true
     });
   }
-  // init s here?
   if(search.cstreaks == 0){
     document.querySelectorAll('.streak').forEach(el => {
       el.remove();
     });
   }
-  let iDate = new Date(search.sdate.getFullYear(), search.sdate.getMonth(), 1);
-  while(iDate <= search.edate){
-    api_urls.push(`https://api.chess.com/pub/player/${ search.ccuser }/games/${ iDate.getFullYear() }/${ (iDate.getMonth()+1).toString().padStart(2, "0") }`);
-    iDate.setMonth(iDate.getMonth()+1);
+  if(!search.fallgames){
+    let iDate = new Date(search.sdate.getFullYear(), search.sdate.getMonth(), 1);
+    while(iDate <= search.edate){
+      api_urls.push(`https://api.chess.com/pub/player/${ search.ccuser }/games/${ iDate.getFullYear() }/${ (iDate.getMonth()+1).toString().padStart(2, "0") }`);
+      iDate.setMonth(iDate.getMonth()+1);
+    }
+    grabGames(api_urls);
+  } else {
+    grabArchive(`https://api.chess.com/pub/player/${ search.ccuser }/games/archives`);
   }
-  grabGames(api_urls);
+  api_log.style.maxHeight = document.querySelector('#params').style.height;
   console.log(`Start time: ${new Date().toLocaleString()}`);
 }
-
 init();

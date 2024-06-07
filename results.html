@@ -35,27 +35,35 @@
           </button>
           <h3>Dataset Stats</h3>
           <div id="stat-log" class="collapse show">
-            <p>Total Games: <span class="game-count float-end fw-bold">0</span></p>
+            <div class='d-flex justify-content-around'>
+              <p>Wins: <strong class='win-counter'>0</strong></p>
+              <p>Draws: <strong class='draw-counter'>0</strong></p>
+              <p>Losses: <strong class='loss-counter'>0</strong></p>
+            </div>
+              <p>Total Games: <span class="game-count float-end fw-bold">0</span></p>
             <div class='streak'>
+              <h4>Streaks</h4>
               <p>Win Streaks: <span class="win-count float-end fw-bold">0</span></p>
               <p>Unbeaten Streaks: <span class="unbeaten-count float-end fw-bold">0</span></p>
               <p>Kramnik Streaks: <span class="kramnik-count float-end fw-bold">0</span></p>
-              <p><em>(More details will be shown below when the data has fully processed)</em></p>
+              <p><em>Tables below fill when data has been fully processed.</em></p>
             </div>
           </div>
         </div>
-        
       </div>
     </div>
     <div class='row mb-2'>
-      <div class='col-sm-4 mb-2'>
-        <a class="btn btn-secondary w-100" href="index.html" role="button">Return Home</a>
+      <div class='col-sm-3 mb-2'>
+        <a id="home" class="btn btn-secondary w-100" href="index.html" role="button">New Search</a>
       </div>
-      <div class='col-sm-4 mb-2'>
+      <div class='col-sm-3 mb-2'>
         <a class="btn btn-info w-100 csv-download disabled" role="button"> Download CSV</a>
       </div>
-      <div class='col-sm-4 mb-2'>
+      <div class='col-sm-3 mb-2'>
         <a class="btn btn-warning w-100 json-download disabled" role="button">Download JSON</a>
+      </div>
+      <div class='col-sm-3 mb-2'>
+        <a class="btn btn-primary w-100 pgn-download disabled" role="button">Download PGN</a>
       </div>
     </div>
   </main>
@@ -78,7 +86,7 @@
                   <th scope="col">Time Class</th>
                   <th scope="col">Av. Player Rating</th>
                   <th scope="col">Av. Opponent Rating</th>
-                  <th scope="col">Rating Diff</th>
+                  <th scope="col">Av. Rating Diff</th>
                   <th scope="col">Start Date</th>
                   <th scope="col">End Date</th>
                 </tr>
@@ -106,7 +114,7 @@
                   <th scope="col">Time Class</th>
                   <th scope="col">Av. Player Rating</th>
                   <th scope="col">Av. Opponent Rating</th>
-                  <th scope="col">Rating Diff</th>
+                  <th scope="col">Av. Rating Diff</th>
                   <th scope="col">Start Date</th>
                   <th scope="col">End Date</th>
                 </tr>
@@ -114,7 +122,7 @@
               <tbody class='unbeaten-streak-tbody'>
               </tbody>
             </table>
-          </div>          
+          </div>
         </div>
 
         <div class='col-lg-4 mb-3 position-relative'>
@@ -134,7 +142,7 @@
                   <th scope="col">Time Class</th>
                   <th scope="col">Av. Player Rating</th>
                   <th scope="col">Av. Opponent Rating</th>
-                  <th scope="col">Rating Diff</th>
+                  <th scope="col">Av. Rating Diff</th>
                   <th scope="col">Start Date</th>
                   <th scope="col">End Date</th>
                 </tr>
@@ -147,9 +155,9 @@
 
       </div>
     </div>
-  
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="results.js"></script>
-    
+
 </body>
 </html>

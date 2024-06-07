@@ -47,15 +47,6 @@ form {
 #api-log p {
   color: var(--download);
 }
-
-#api-log { 
-  max-height: 300px;
-}
-@media (min-width: 992px) {
-  #api-log {
-    max-height: 250px;
-  }
-}
 .table-title {
   background-color: var(--main-bg);
   border-bottom: 5px ridge var(--highlight);
