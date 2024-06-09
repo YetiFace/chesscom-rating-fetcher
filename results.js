@@ -93,7 +93,7 @@ const S = {
           S.Increase(s, g, true);
           break;
         case "kramnik":
-          if(s.games >= 25 || s.games <= 5 || s.draws > 0){
+          if(s.games > 25 || s.games <= 5 || s.draws > 0){
             S.Bank(st, g.time_class);
             break;
           }
